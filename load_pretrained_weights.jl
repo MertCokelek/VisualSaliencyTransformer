@@ -1,4 +1,6 @@
 export compare, loadPretrainedWeightsT2TViT
+using PyCall
+@pyimport torch
 
 model_path = "/home/mertcokelek/Downloads/80.7_T2T_ViT_t_14.pth.tar"
 
@@ -11,7 +13,7 @@ function print_pretrained(path)
     end
 end
 
-function compare(path, model)
+#= function compare(path, model)
     weights = torch.load(path, map_location=torch.device("cpu"))["state_dict_ema"];
     for i in 1:14
         # blocks
@@ -85,7 +87,7 @@ function compare(path, model)
     @show size(model.pos_embed), size(Param(atype(weights["pos_embed"][:cpu]()[:numpy]())))
 
 end
-
+ =#
 
 function loadPretrainedWeightsT2TViT(path, model)
     weights = torch.load(path, map_location=torch.device("cpu"))["state_dict_ema"];
@@ -160,5 +162,6 @@ function loadPretrainedWeightsT2TViT(path, model)
 
     model.pos_embed = Param(atype(weights["pos_embed"][:cpu]()[:numpy]()))
 
+    println("Pretrained weights are loaded successfully.")
     return model
 end

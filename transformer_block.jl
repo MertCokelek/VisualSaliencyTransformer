@@ -29,8 +29,8 @@ mutable struct Mlp
     function Mlp(in_features; hidden_features=nothing, out_features=nothing, act_layer::Function=gelu, drop=0.)
         self = new(in_features, hidden_features, out_features, act_layer, drop)
         
-        out_features = out_features == nothing ? in_features : out_features
-        hidden_features = hidden_features == nothing ? in_features : hidden_features
+        out_features = out_features === nothing ? in_features : out_features
+        hidden_features = hidden_features === nothing ? in_features : hidden_features
         
         self.fc1 = Linear(in_features, hidden_features)
         self.act = gelu#() ????
@@ -63,11 +63,11 @@ function transposedims(x, dim1, dim2)
     return permutedims(x, size_)
 end
 
-mutable struct Attention
+mutable struct TransformerAttention
     dim; num_heads; qkv_bias; qk_scale; attn_drop; proj_drop;
     
     scale; qkv; proj;
-    function Attention(;dim=784, num_heads=8, qkv_bias=false, qk_scale=false, attn_drop=0., proj_drop=0.)
+    function TransformerAttention(;dim=784, num_heads=8, qkv_bias=false, qk_scale=false, attn_drop=0., proj_drop=0.)
         self = new(dim, num_heads, qkv_bias, qk_scale, attn_drop, proj_drop)
         self.num_heads = num_heads
         head_dim = dim ÷ num_heads
@@ -81,7 +81,7 @@ mutable struct Attention
         return self
     end
 end
-function(self::Attention)(x)
+function(self::TransformerAttention)(x)
     B, N, C = size(x)
     qkv = permutedims(reshape(self.qkv(x), (B, N, 3, self.num_heads, C ÷ self.num_heads)), (3,1,4,2,5))
     q, k, v = qkv[1], qkv[1], qkv[2]
@@ -114,7 +114,7 @@ mutable struct Block
         
         @assert norm_layer == "LayerNorm"
         self.norm1 = LayerNorm(dim)
-        self.attn = Attention(;dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,attn_drop=attn_drop)
+        self.attn = TransformerAttention(;dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,attn_drop=attn_drop)
         # self.attn =  Attention(dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
         
         # TODO: DropPath: If drop_path != 0., Adapt https://github.com/rwightman/pytorch-image-models/blob/f7d210d759beb00a3d0834a3ce2d93f6e17f3d38/timm/models/layers/drop.py#L160 to Julia
