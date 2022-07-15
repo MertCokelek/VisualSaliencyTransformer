@@ -41,3 +41,42 @@ mutable struct Mlp
         return x
     end
 end
+
+
+mutable struct Block
+    dim; num_heads; mlp_ratio; qkv_bias; qk_scale; drop; attn_drop;
+    drop_path; act_layer; norm_layer;
+    
+    norm1;
+    attn;
+    norm2;
+    mlp;
+    
+    function Block(;dim=784, num_heads=8, mlp_ratio=4.0, qkv_bias=false, qk_scale=false, drop=0., attn_drop=0.,
+        drop_path=0., act_layer::Function=gelu, norm_layer="LayerNorm")
+    
+        self = new(dim, num_heads, mlp_ratio, qkv_bias, qk_scale, drop, attn_drop, drop_path, act_layer, norm_layer)
+        
+        @assert norm_layer == "LayerNorm"
+        self.norm1 = LayerNorm(dim)
+        # self.attn = Attention(;dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,attn_drop=attn_drop)
+        self.attn = Attention(;dim=dim, in_dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,attn_drop=attn_drop, proj_drop=drop)
+    
+        # TODO: DropPath: If drop_path != 0., Adapt https://github.com/rwightman/pytorch-image-models/blob/f7d210d759beb00a3d0834a3ce2d93f6e17f3d38/timm/models/layers/drop.py#L160 to Julia
+        # self.drop_path = drop_path > 0.? DropPath(drop_path) : nn.Identity()  # ????
+                
+        self.norm2 = LayerNorm(dim)
+        mlp_hidden_dim = convert(Int, dim * mlp_ratio)
+        self.mlp = Mlp(dim;   hidden_features=mlp_hidden_dim, out_features=dim, act_layer=act_layer, drop_rate=drop)
+        return self
+    end
+end
+
+function (self::Block)(x)
+    # x = x + self.drop_path(self.attn(self.norm1(x)))
+    # x = x + self.drop_path(self.mlp(self.norm2(x)))
+    
+    x = x + self.attn(self.norm1(x))
+    x = x + self.mlp(self.norm2(x))
+    return x
+end 
