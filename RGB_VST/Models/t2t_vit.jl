@@ -1,6 +1,7 @@
 export T2T_ViT
 
 include("token_transformer.jl")
+include("utils.jl")
 using PyCall
 
 # @pyimport torch
@@ -28,10 +29,10 @@ mutable struct T2T_module
         
         if tokens_type == "transformer"
             println("adopt transformer encoder for tokens-to-token")
-            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(2, 2))
-            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-            self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-            
+            # unfold operation will be done in functionally.
+            self.soft_split0 = Unfold(7, 4, 2)
+            self.soft_split1 = Unfold(3, 2, 1)
+            self.soft_split2 = Unfold(3, 2, 1)            
             # self.attention1 = Token_performer(in_chans*7*7, token_dim; kernel_ratio=0.5)
             # self.attention2 = Token_performer(token_dim*3*3, token_dim; kernel_ratio=0.5)
 
@@ -54,11 +55,13 @@ end
 
 function (self::T2T_module)(x)
     # step0: soft split
-    x = permutedims(self.soft_split0(x), [2, 3])
+    x = permutedims(self.soft_split0(x), [1, 3, 2])
+    # x = permutedims(self.soft_split0(x), [2, 1, 3])
+    println("T2T_module forward: ", size(x), " ", typeof(x));
+
     
     # x [B, 56*56, 147=7*7*3]
     # iteration1: restructurization/reconstruction
-    
     x_1_4 = self.attention1(x)
     B, new_HW, C = size(x_1_4)
     x = reshape(permutedims(x_1_4, [2, 3]), (B, C, convert(Int, sqrt(new_HW)), convert(Int, sqrt(new_HW))))

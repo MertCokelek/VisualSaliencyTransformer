@@ -2,7 +2,8 @@ export compare, loadPretrainedWeightsT2TViT
 using PyCall
 @pyimport torch
 
-model_path = "/home/mertcokelek/Downloads/80.7_T2T_ViT_t_14.pth.tar"
+# model_path = "/home/mertcokelek/Downloads/80.7_T2T_ViT_t_14.pth.tar"
+# model_path = "/home/mcokelek21/Downloads/80.7_T2T_ViT_t_14.pth.tar"
 
 function print_pretrained(path)
     weights = torch.load(path, map_location=torch.device("cpu"))["state_dict_ema"];
@@ -13,81 +14,84 @@ function print_pretrained(path)
     end
 end
 
-#= function compare(path, model)
+# fun
+
+function compare(path, model)
     weights = torch.load(path, map_location=torch.device("cpu"))["state_dict_ema"];
     for i in 1:14
         # blocks
-        @show size(model.blocks[i].attn.qkv.w), size(Param(atype(weights["blocks.$(i-1).attn.qkv.weight"][:cpu]()[:numpy]())))
+        @assert size(model.blocks[i].attn.qkv.w) === size(Param(atype(weights["blocks.$(i-1).attn.qkv.weight"][:cpu]()[:numpy]()))); 
         
-        @show size(model.blocks[i].attn.proj.w), size(Param(atype(weights["blocks.$(i-1).attn.proj.weight"][:cpu]()[:numpy]())))
-        @show size(model.blocks[i].attn.proj.b), size(Param(atype(weights["blocks.$(i-1).attn.proj.bias"][:cpu]()[:numpy]())))
+        @assert size(model.blocks[i].attn.proj.w) === size(Param(atype(weights["blocks.$(i-1).attn.proj.weight"][:cpu]()[:numpy]()))); 
+        @assert size(model.blocks[i].attn.proj.b) === size(Param(atype(weights["blocks.$(i-1).attn.proj.bias"][:cpu]()[:numpy]()))); 
         
-        @show size(model.blocks[i].mlp.fc1.w), size(Param(atype(weights["blocks.$(i-1).mlp.fc1.weight"][:cpu]()[:numpy]())))
-        @show size(model.blocks[i].mlp.fc1.b), size(Param(atype(weights["blocks.$(i-1).mlp.fc1.bias"][:cpu]()[:numpy]())))
+        @assert size(model.blocks[i].mlp.fc1.w) === size(Param(atype(weights["blocks.$(i-1).mlp.fc1.weight"][:cpu]()[:numpy]()))); 
+        @assert size(model.blocks[i].mlp.fc1.b) === size(Param(atype(weights["blocks.$(i-1).mlp.fc1.bias"][:cpu]()[:numpy]()))); 
         
         
-        @show size(model.blocks[i].mlp.fc2.w), size(Param(atype(weights["blocks.$(i-1).mlp.fc2.weight"][:cpu]()[:numpy]())))
-        @show size(model.blocks[i].mlp.fc2.b), size(Param(atype(weights["blocks.$(i-1).mlp.fc2.bias"][:cpu]()[:numpy]())))
+        @assert size(model.blocks[i].mlp.fc2.w) === size(Param(atype(weights["blocks.$(i-1).mlp.fc2.weight"][:cpu]()[:numpy]()))); 
+        @assert size(model.blocks[i].mlp.fc2.b) === size(Param(atype(weights["blocks.$(i-1).mlp.fc2.bias"][:cpu]()[:numpy]()))); 
         
-        @show size(model.blocks[i].norm1.a), size(Param(atype(weights["blocks.$(i-1).norm1.weight"][:cpu]()[:numpy]())))
-        @show size(model.blocks[i].norm1.b), size(Param(atype(weights["blocks.$(i-1).norm1.bias"][:cpu]()[:numpy]())))
+        @assert size(model.blocks[i].norm1.a) === size(Param(atype(weights["blocks.$(i-1).norm1.weight"][:cpu]()[:numpy]()))); 
+        @assert size(model.blocks[i].norm1.b) === size(Param(atype(weights["blocks.$(i-1).norm1.bias"][:cpu]()[:numpy]()))); 
         
-        @show size(model.blocks[i].norm2.a), size(Param(atype(weights["blocks.$(i-1).norm2.weight"][:cpu]()[:numpy]())))
-        @show size(model.blocks[i].norm2.b), size(Param(atype(weights["blocks.$(i-1).norm2.bias"][:cpu]()[:numpy]())))
+        @assert size(model.blocks[i].norm2.a) === size(Param(atype(weights["blocks.$(i-1).norm2.weight"][:cpu]()[:numpy]()))); 
+        @assert size(model.blocks[i].norm2.b) === size(Param(atype(weights["blocks.$(i-1).norm2.bias"][:cpu]()[:numpy]()))); 
    end
 
     # tokens_to_token
           # attn 1
-    @show size(model.tokens_to_token.attention1.attn.proj.w), size(Param(atype(weights["tokens_to_token.attention1.attn.proj.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention1.attn.proj.b), size(Param(atype(weights["tokens_to_token.attention1.attn.proj.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention1.attn.proj.w) === size(Param(atype(weights["tokens_to_token.attention1.attn.proj.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention1.attn.proj.b) === size(Param(atype(weights["tokens_to_token.attention1.attn.proj.bias"][:cpu]()[:numpy]()))); 
 
-    @show size(model.tokens_to_token.attention1.attn.qkv.w), size(Param(atype(weights["tokens_to_token.attention1.attn.qkv.weight"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention1.attn.qkv.w) === size(Param(atype(weights["tokens_to_token.attention1.attn.qkv.weight"][:cpu]()[:numpy]()))); 
 
-    @show size(model.tokens_to_token.attention1.mlp.fc1.w), size(Param(atype(weights["tokens_to_token.attention1.mlp.fc1.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention1.mlp.fc1.b), size(Param(atype(weights["tokens_to_token.attention1.mlp.fc1.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention1.mlp.fc1.w) === size(Param(atype(weights["tokens_to_token.attention1.mlp.fc1.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention1.mlp.fc1.b) === size(Param(atype(weights["tokens_to_token.attention1.mlp.fc1.bias"][:cpu]()[:numpy]()))); 
    
-    @show size(model.tokens_to_token.attention1.mlp.fc2.w), size(Param(atype(weights["tokens_to_token.attention1.mlp.fc2.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention1.mlp.fc2.b), size(Param(atype(weights["tokens_to_token.attention1.mlp.fc2.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention1.mlp.fc2.w) === size(Param(atype(weights["tokens_to_token.attention1.mlp.fc2.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention1.mlp.fc2.b) === size(Param(atype(weights["tokens_to_token.attention1.mlp.fc2.bias"][:cpu]()[:numpy]()))); 
 
-    @show size(model.tokens_to_token.attention1.norm1.a), size(Param(atype(weights["tokens_to_token.attention1.norm1.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention1.norm1.b), size(Param(atype(weights["tokens_to_token.attention1.norm1.bias"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention1.norm2.a), size(Param(atype(weights["tokens_to_token.attention1.norm2.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention1.norm2.b), size(Param(atype(weights["tokens_to_token.attention1.norm2.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention1.norm1.a) === size(Param(atype(weights["tokens_to_token.attention1.norm1.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention1.norm1.b) === size(Param(atype(weights["tokens_to_token.attention1.norm1.bias"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention1.norm2.a) === size(Param(atype(weights["tokens_to_token.attention1.norm2.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention1.norm2.b) === size(Param(atype(weights["tokens_to_token.attention1.norm2.bias"][:cpu]()[:numpy]()))); 
     
           # attn2
-    @show size(model.tokens_to_token.attention2.attn.proj.w), size(Param(atype(weights["tokens_to_token.attention2.attn.proj.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention2.attn.proj.b), size(Param(atype(weights["tokens_to_token.attention2.attn.proj.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention2.attn.proj.w) === size(Param(atype(weights["tokens_to_token.attention2.attn.proj.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention2.attn.proj.b) === size(Param(atype(weights["tokens_to_token.attention2.attn.proj.bias"][:cpu]()[:numpy]()))); 
 
-    @show size(model.tokens_to_token.attention2.attn.qkv.w), size(Param(atype(weights["tokens_to_token.attention2.attn.qkv.weight"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention2.attn.qkv.w) === size(Param(atype(weights["tokens_to_token.attention2.attn.qkv.weight"][:cpu]()[:numpy]()))); 
 
-    @show size(model.tokens_to_token.attention2.mlp.fc1.w), size(Param(atype(weights["tokens_to_token.attention2.mlp.fc1.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention2.mlp.fc1.b), size(Param(atype(weights["tokens_to_token.attention2.mlp.fc1.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention2.mlp.fc1.w) === size(Param(atype(weights["tokens_to_token.attention2.mlp.fc1.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention2.mlp.fc1.b) === size(Param(atype(weights["tokens_to_token.attention2.mlp.fc1.bias"][:cpu]()[:numpy]()))); 
    
-    @show size(model.tokens_to_token.attention2.mlp.fc2.w), size(Param(atype(weights["tokens_to_token.attention2.mlp.fc2.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention2.mlp.fc2.b), size(Param(atype(weights["tokens_to_token.attention2.mlp.fc2.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention2.mlp.fc2.w) === size(Param(atype(weights["tokens_to_token.attention2.mlp.fc2.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention2.mlp.fc2.b) === size(Param(atype(weights["tokens_to_token.attention2.mlp.fc2.bias"][:cpu]()[:numpy]()))); 
 
-    @show size(model.tokens_to_token.attention2.norm1.a), size(Param(atype(weights["tokens_to_token.attention2.norm1.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention2.norm1.b), size(Param(atype(weights["tokens_to_token.attention2.norm1.bias"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention2.norm2.a), size(Param(atype(weights["tokens_to_token.attention2.norm2.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.attention2.norm2.b), size(Param(atype(weights["tokens_to_token.attention2.norm2.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.attention2.norm1.a) === size(Param(atype(weights["tokens_to_token.attention2.norm1.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention2.norm1.b) === size(Param(atype(weights["tokens_to_token.attention2.norm1.bias"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention2.norm2.a) === size(Param(atype(weights["tokens_to_token.attention2.norm2.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.attention2.norm2.b) === size(Param(atype(weights["tokens_to_token.attention2.norm2.bias"][:cpu]()[:numpy]()))); 
 
          # project
-    @show size(model.tokens_to_token.project.w), size(Param(atype(weights["tokens_to_token.project.weight"][:cpu]()[:numpy]())))
-    @show size(model.tokens_to_token.project.b), size(Param(atype(weights["tokens_to_token.project.bias"][:cpu]()[:numpy]())))
+    @assert size(model.tokens_to_token.project.w) === size(Param(atype(weights["tokens_to_token.project.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.tokens_to_token.project.b) === size(Param(atype(weights["tokens_to_token.project.bias"][:cpu]()[:numpy]()))); 
     
     
-    @show size(model.cls_token), size(Param(atype(weights["cls_token"][:cpu]()[:numpy]())))
+    @assert size(model.cls_token) === size(Param(atype(weights["cls_token"][:cpu]()[:numpy]()))); 
 
-    @show size(model.head.w), size(Param(atype(weights["head.weight"][:cpu]()[:numpy]())))
-    @show size(model.head.b), size(Param(atype(weights["head.bias"][:cpu]()[:numpy]())))
+    @assert size(model.head.w) === size(Param(atype(weights["head.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.head.b) === size(Param(atype(weights["head.bias"][:cpu]()[:numpy]()))); 
 
-    @show size(model.norm.a), size(Param(atype(weights["norm.weight"][:cpu]()[:numpy]())))
-    @show size(model.norm.b), size(Param(atype(weights["norm.bias"][:cpu]()[:numpy]())))
+    @assert size(model.norm.a) === size(Param(atype(weights["norm.weight"][:cpu]()[:numpy]()))); 
+    @assert size(model.norm.b) === size(Param(atype(weights["norm.bias"][:cpu]()[:numpy]()))); 
 
-    @show size(model.pos_embed), size(Param(atype(weights["pos_embed"][:cpu]()[:numpy]())))
+    @assert size(model.pos_embed) === size(Param(atype(weights["pos_embed"][:cpu]()[:numpy]()))); 
 
+    println("Model structure is correct!")
 end
- =#
+ 
 
 function loadPretrainedWeightsT2TViT(path, model)
     weights = torch.load(path, map_location=torch.device("cpu"))["state_dict_ema"];

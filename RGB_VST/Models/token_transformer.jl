@@ -2,7 +2,6 @@
 include("transformer_block.jl")
 include("utils.jl")
 export Attention, Token_transformer
-
 mutable struct TTAttention
     dim; num_heads; in_dim; qkv_bias; qk_scale; attn_drop; proj_drop;
     
@@ -17,7 +16,6 @@ mutable struct TTAttention
         self.scale = qk_scale || head_dim^-0.5
         
         # Seperating qkv.
-        println("TTAttention ", dim, " ", in_dim)
         self.qkv = Linear(dim, in_dim*3, bias=qkv_bias)
         
         # self.q = Linear(dim, in_dim, bias=qkv_bias)
@@ -61,21 +59,24 @@ mutable struct Token_transformer
     
     norm1; attn; norm2; mlp;
     
-    function Token_transformer(dim, in_dim, num_heads; mlp_ratio=1., qkv_bias=false, qk_scale=false, drop=0., attn_drop=0., drop_path=0., proj_drop=0., act_layer="gelu", norm_layer="LayerNorm")
+    function Token_transformer(dim, in_dim, num_heads; mlp_ratio=1, qkv_bias=false, qk_scale=false, drop=0., attn_drop=0., drop_path=0., proj_drop=0., act_layer="gelu", norm_layer="LayerNorm")
         self = new(dim, in_dim, num_heads, mlp_ratio, qkv_bias, qk_scale, drop, attn_drop, drop_path, act_layer, norm_layer)
-        println("Token trnsformer ", dim, " ", in_dim)
         self.norm1=LayerNorm(dim)
         self.attn = TTAttention(;dim=dim, in_dim=in_dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale,attn_drop=attn_drop, proj_drop=proj_drop)
         # self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.norm2 = LayerNorm(in_dim)
-        self.mlp = Mlp(in_dim;hidden_features=convert(Int32, in_dim*mlp_ratio), out_features=in_dim, act_layer=gelu, drop=drop)
+        self.mlp = Mlp(in_dim;hidden_features=convert(Int64, in_dim*mlp_ratio), out_features=in_dim, act_layer=gelu, drop=drop)
+        # self.mlp = Mlp(in_dim;hidden_features=in_dim*mlp_ratio, out_features=in_dim, act_layer=gelu, drop=drop)
         return self
     end
 end
 
 
 function (self::Token_transformer)(x)
-    x = self.attn(self.norm1(x))
+    println("token_transformer.jl: forward pass", size(x), self.dim)
+    # x = self.norm1(KnetArray(x))
+    x = self.attn(KnetArray(x))
+    # x = self.attn(self.norm1(x))
     x = x + self.mlp(self.norm2(x))
     # x = x + self.drop_path(self.mlp(self.norm2(x)))
     return x
