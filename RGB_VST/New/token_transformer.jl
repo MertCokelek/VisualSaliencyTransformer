@@ -115,7 +115,7 @@ end
 
 
 function (self::Token_transformer)(x)
-    x = self.norm1(param(x))
+    x = self.norm1(x)
     x = self.attn(x)
     x = x + self.mlp(self.norm2(x))
     # x = x + self.drop_path(self.mlp(self.norm2(x)))

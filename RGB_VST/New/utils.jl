@@ -72,7 +72,7 @@ function (self::Unfold)(T)
             ctr_i += 1
         end
         println("After Unfold")
-        @show size(Tput)
+        @show size(Tout)
         return Tout
     end
 
